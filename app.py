@@ -4,25 +4,18 @@ import matplotlib.pyplot as plt  # dibuja los gráficos
 import numpy as np               # cálculos numéricos (la línea de tendencia)
 
 st.set_page_config(
-    page_title="Inversión en marketing vs. Ingresos",
+    page_title="Inversión en marketing y su impacto en las Ventas",
     layout="centered"
 )
 
-
-
-
-# Color principal del proyecto (el mismo de la Guía 1)
 COLOR_PRINCIPAL = "steelblue"
-
 
 # Convierte un número en texto de dinero: 79110 -> "USD 79.110"
 def formato_usd(valor):
     return f"USD {valor:,.0f}".replace(",", ".")
 
-
 @st.cache_data
 def cargar_datos():
-    # La ruta NO lleva "../" porque app.py está en la raíz del proyecto
     return pd.read_csv("data/processed/marketing_sales_limpio.csv")
 
 df = cargar_datos()
@@ -34,7 +27,7 @@ st.write(
     "acotar los datos y observá cómo se actualizan las visualizaciones."
 )
 
-st.sidebar.markdown("## Filtros")
+st.sidebar.markdown("## Filter")
 st.sidebar.markdown(
     "Ajustá el rango de presupuesto y elegí los canales que querés analizar."
 )
@@ -60,16 +53,13 @@ canales = st.sidebar.multiselect(
     default=df["sales_channel"].unique()
 )
 
-
-
-
 df_filtrado = df[
     (df["marketing_budget_usd"] >= rango[0]) &
     (df["marketing_budget_usd"] <= rango[1]) &
     (df["sales_channel"].isin(canales))
 ]
 
-# Si no quedó ningún dato (deseleccionó todos los canales), avisamos y frenamos.
+# Si no existen datos cuando se aplican los filtros se detiene el cálculo.
 if df_filtrado.empty:
     st.warning("No hay datos para los filtros seleccionados. Ajustá los filtros para ver resultados.")
     st.stop()
@@ -81,17 +71,12 @@ st.write(
     f"**{formato_usd(rango[0])}** y **{formato_usd(rango[1])}**."
 )
 
-
-
-
-# Tres tarjetas con los números clave del filtro actual
+# Tres tarjetas visuales: Ventas, Ingreso Promedio e Inversión Promedio.
 col1, col2, col3 = st.columns(3)
 
 col1.metric("Ventas seleccionadas", f"{len(df_filtrado):,}".replace(",", "."))
 col2.metric("Ingreso promedio", formato_usd(df_filtrado["sales_revenue_usd"].mean()))
 col3.metric("Inversión promedio", formato_usd(df_filtrado["marketing_budget_usd"].mean()))
-
-
 
 st.subheader("Resumen descriptivo")
 st.markdown("Valores expresados en USD.")
@@ -107,7 +92,7 @@ columnas_resumen = [
 # describe() de esas columnas, transpuesto
 resumen = df_filtrado[columnas_resumen].describe().T
 
-# Nombres legibles para mostrar (solo la presentación, no cambia los datos)
+# Se cambia de nombre a las filas a los efectos de presentación.
 resumen = resumen.rename(index={
     "marketing_budget_usd": "Marketing Budget",
     "ad_spend_online_usd": "Ad Spent Online",
@@ -124,10 +109,7 @@ st.dataframe(resumen.style.format(formato_tabla))
 rango_ingresos = df_filtrado["sales_revenue_usd"].max() - df_filtrado["sales_revenue_usd"].min()
 st.write(f"Rango de ingresos (máximo − mínimo): **{formato_usd(rango_ingresos)}**")
 
-
-
-
-
+# Histograma
 st.subheader("Distribución de los ingresos")
 st.write("La mayoría de las ventas generan ingresos bajos o medios, y unas pocas "
          "alcanzan montos muy altos. Por eso la distribución se concentra a la "
@@ -145,10 +127,7 @@ ax1.set_ylabel("Cantidad de ventas")
 ax1.set_xlim(0, 40000)
 st.pyplot(fig1)
 
-
-
-
-
+# Scatter Plot con Línea de Tendencia
 st.subheader("Inversión en marketing vs. Ingresos")
 st.write("Cada punto es una venta. La línea roja es la tendencia general: "
          "a mayor presupuesto de marketing, los ingresos tienden a ser mayores.")
@@ -174,9 +153,7 @@ ax2.set_ylabel("Ingresos (USD)")
 ax2.set_ylim(0, 40000)
 st.pyplot(fig2)
 
-
-
-
+# Bar Graph
 st.subheader("Ingreso promedio por canal")
 st.write("Comparamos cuánto genera en promedio cada canal de venta, según los "
          "filtros aplicados.")
