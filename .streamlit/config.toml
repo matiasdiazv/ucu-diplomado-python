@@ -1,0 +1,17 @@
+# =============================================================
+#  Tema visual de la app — paleta del proyecto (steelblue)
+# =============================================================
+#  Este archivo hace que TODA la app (slider, selección, bordes,
+#  barra lateral) use la misma paleta que los gráficos.
+#
+#  IMPORTANTE: guardá este archivo en una carpeta llamada
+#  ".streamlit" en la raíz del proyecto, con el nombre "config.toml".
+#  Es decir, la ruta debe ser:   .streamlit/config.toml
+# =============================================================
+
+[theme]
+primaryColor = "#4682B4"              # steelblue: color de acento (slider, selección, foco)
+backgroundColor = "#FFFFFF"           # fondo principal (blanco)
+secondaryBackgroundColor = "#EAF0F6"  # fondo de la barra lateral (azul muy claro, de la misma familia)
+textColor = "#1A1A1A"                 # color del texto
+font = "sans serif"                   # tipografía
