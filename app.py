@@ -16,7 +16,12 @@ def formato_usd(valor):
 
 @st.cache_data
 def cargar_datos():
-    return pd.read_csv("data/processed/marketing_sales_limpio.csv")
+    # La ruta NO lleva "../" porque app.py está en la raíz del proyecto
+    df = pd.read_csv("data/processed/marketing_sales_limpio.csv")
+    df["date"] = pd.to_datetime(df["date"])   # el CSV guarda la fecha como texto: la reconvertimos
+    df["year"] = df["date"].dt.year           # columna de año, para el filtro
+    return df
+
 
 df = cargar_datos()
 
@@ -53,13 +58,21 @@ canales = st.sidebar.multiselect(
     default=df["sales_channel"].unique()
 )
 
+# Filtro 3: año (selector de uno o varios años)
+anios = st.sidebar.multiselect(
+    "Año",
+    options=sorted(df["year"].unique()),
+    default=sorted(df["year"].unique())
+)
+
 df_filtrado = df[
     (df["marketing_budget_usd"] >= rango[0]) &
     (df["marketing_budget_usd"] <= rango[1]) &
-    (df["sales_channel"].isin(canales))
+    (df["sales_channel"].isin(canales)) &
+    (df["year"].isin(anios))
 ]
 
-# Si no existen datos cuando se aplican los filtros se detiene el cálculo.
+# Si no quedó ningún dato (combinación de filtros sin ventas), avisamos y frenamos.
 if df_filtrado.empty:
     st.warning("No hay datos para los filtros seleccionados. Ajustá los filtros para ver resultados.")
     st.stop()
